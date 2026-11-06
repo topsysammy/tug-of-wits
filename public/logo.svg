@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="rope" width="28" height="44" patternUnits="userSpaceOnUse" patternTransform="skewX(-25)">
+      <rect width="28" height="44" fill="#D9A55B"/>
+      <rect x="16" width="12" height="44" fill="#A8743A"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="#FFC83D"/>
+  <circle cx="256" cy="256" r="196" fill="#FFD766"/>
+  <!-- rope -->
+  <rect x="40" y="241" width="432" height="38" rx="19" fill="#9C6A2E"/>
+  <rect x="40" y="234" width="432" height="38" rx="19" fill="url(#rope)"/>
+  <!-- hands: you (orange) and opponent (blue) -->
+  <rect x="78" y="200" width="64" height="104" rx="30" fill="#E0702A"/>
+  <rect x="78" y="194" width="64" height="104" rx="30" fill="#FF8A3D"/>
+  <rect x="370" y="200" width="64" height="104" rx="30" fill="#1E63A8"/>
+  <rect x="370" y="194" width="64" height="104" rx="30" fill="#2F86DB"/>
+  <!-- knuckles -->
+  <g fill="none" stroke-width="7" stroke-linecap="round">
+    <path d="M124 222 H142 M124 246 H142 M124 270 H142" stroke="#E0702A"/>
+    <path d="M370 222 H388 M370 246 H388 M370 270 H388" stroke="#1E63A8"/>
+  </g>
+  <!-- strain marks -->
+  <g fill="none" stroke="#E39B12" stroke-width="9" stroke-linecap="round">
+    <path d="M64 168 L84 186 M44 206 L66 212"/>
+    <path d="M448 168 L428 186 M468 206 L446 212"/>
+  </g>
+  <!-- knot -->
+  <circle cx="256" cy="266" r="70" fill="#C53030"/>
+  <circle cx="256" cy="253" r="70" fill="#FFFFFF"/>
+  <circle cx="256" cy="253" r="52" fill="#FF5A5A"/>
+  <path d="M226 236 Q244 222 262 226" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="10" stroke-linecap="round"/>
+</svg>
