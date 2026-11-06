@@ -1,0 +1,87 @@
+@import '@fontsource/fredoka/latin-600.css';
+@import '@fontsource/fredoka/latin-700.css';
+@import '@fontsource/nunito/latin-700.css';
+@import '@fontsource/nunito/latin-800.css';
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Fredoka', ui-rounded, system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, sans-serif;
+
+  --color-ground: #fdf3dc;
+  --color-card: #ffffff;
+  --color-card-edge: #f6e7c6;
+  --color-card-shadow: #f1ddb0;
+  --color-cream: #fff9ec;
+  --color-ink: #3b2a12;
+  --color-muted: #7a6248;
+
+  --color-yellow: #ffc83d;
+  --color-yellow-deep: #e39b12;
+  --color-yellow-ink: #4a2e00;
+  --color-yellow-label: #6a4200;
+
+  --color-blue: #2f86db;
+  --color-blue-deep: #1e63a8;
+  --color-blue-ink: #1e5a99;
+
+  --color-whatsapp: #25d366;
+  --color-whatsapp-deep: #179848;
+  --color-whatsapp-ink: #0b2a16;
+
+  --color-correct: #4cd37f;
+  --color-correct-deep: #2ea45e;
+  --color-correct-ink: #0b2a16;
+  --color-wrong: #ff7a7a;
+  --color-wrong-deep: #d94545;
+  --color-wrong-ink: #3a0a0a;
+  --color-danger-text: #b42318;
+
+  --color-me: #ff8a3d;
+  --color-me-ink: #a33a00;
+  --color-me-tint: #ffe7d6;
+  --color-opp: #2f86db;
+  --color-opp-ink: #1e5a99;
+  --color-opp-tint: #d7eafb;
+
+  --color-sky: #d7eafb;
+  --color-sky-shadow: #b9d7f2;
+  --color-muted-tile: #f3ebda;
+  --color-muted-tile-deep: #e2d5ba;
+  --color-track: #f1ddb0;
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-weight: 700;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  #root {
+    min-height: 100dvh;
+  }
+  button {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  button:disabled {
+    cursor: default;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
