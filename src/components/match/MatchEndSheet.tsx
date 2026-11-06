@@ -11,7 +11,7 @@ interface MatchEndSheetProps {
   wins: { me: number; opp: number };
   history: RoundRecord[];
   durationMs: number;
-  onPlayAgain: () => void;
+  onPlayAgain?: () => void;
   onExit: () => void;
 }
 
@@ -72,9 +72,11 @@ export function MatchEndSheet(p: MatchEndSheetProps) {
           <Tile label="Fastest" value={fmtSeconds(stats.fastestMs)} gold />
         </div>
       </motion.div>
-      <Button variant="yellow" onClick={p.onPlayAgain}>
-        Play again
-      </Button>
+      {p.onPlayAgain && (
+        <Button variant="yellow" onClick={p.onPlayAgain}>
+          Play again
+        </Button>
+      )}
       <Button variant="white" onClick={p.onExit}>
         Back
       </Button>

@@ -1,6 +1,8 @@
 import { useRef, type ReactNode } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { ROUND_MS } from '@shared/gameConfig.ts';
+import type { Side } from '@shared/types.ts';
+import { Icon } from '../components/ui/Icon.tsx';
 import { useMatch } from '../hooks/useMatch.ts';
 import { useNow } from '../hooks/useNow.ts';
 import type { MatchTransport } from '../game/transport.ts';
@@ -18,14 +20,16 @@ import { MatchEndSheet } from '../components/match/MatchEndSheet.tsx';
 interface MatchScreenProps<T extends MatchTransport> {
   /** Must be stable for the life of one match; a new function starts a new match. */
   createTransport: () => T;
-  onPlayAgain: () => void;
+  mySide?: Side;
+  /** Omit to hide "Play again" (online rematch arrives in phase 3). */
+  onPlayAgain?: () => void;
   onExit: () => void;
   /** Optional dev tools (phase 1 simulator panel). */
   devTools?: (getTransport: () => T | null) => ReactNode;
 }
 
-export function MatchScreen<T extends MatchTransport>({ createTransport, onPlayAgain, onExit, devTools }: MatchScreenProps<T>) {
-  const { state: s, question, shownAt, answer, transportRef } = useMatch(createTransport);
+export function MatchScreen<T extends MatchTransport>({ createTransport, mySide = 0, onPlayAgain, onExit, devTools }: MatchScreenProps<T>) {
+  const { state: s, question, shownAt, answer, transportRef } = useMatch(createTransport, mySide);
   const ticking = s.phase === 'question' && shownAt !== null;
   const now = useNow(ticking, 100);
 
@@ -64,6 +68,12 @@ export function MatchScreen<T extends MatchTransport>({ createTransport, onPlayA
 
   return (
     <div className="relative mx-auto flex min-h-dvh max-w-[480px] flex-col gap-3.5 overflow-hidden px-5 pt-[max(24px,env(safe-area-inset-top))] pb-6">
+      {s.linkDown && (
+        <div role="status" className="absolute inset-x-5 top-2 z-40 flex items-center justify-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-extrabold text-white">
+          <Icon name="wifiOff" size={16} />
+          Reconnecting…
+        </div>
+      )}
       <StatBar questionNumber={s.questionNumber} secondsLeft={msLeft / 1000} wins={s.wins} />
       <Arena
         me={s.me}

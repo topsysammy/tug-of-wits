@@ -41,6 +41,10 @@ export interface ClientMatchState {
   pullSeq: number;
   oppOnline: boolean;
   forfeitAt: number | null;
+  /** This phone's own connection to the room is down (online only). */
+  linkDown: boolean;
+  /** How long the current question had already been open when we got it (rejoin), ms. */
+  roundOffsetMs: number;
   end: { iWon: boolean; reason: MatchEndReason; history: RoundRecord[]; durationMs: number } | null;
 }
 
@@ -66,6 +70,8 @@ const initial = (mySide: Side): ClientMatchState => ({
   pullSeq: 0,
   oppOnline: true,
   forfeitAt: null,
+  linkDown: false,
+  roundOffsetMs: 0,
   end: null,
 });
 
@@ -108,6 +114,7 @@ function reducer(s: ClientMatchState, a: Action): ClientMatchState {
         myVerdict: null,
         oppAnswer: null,
         reveal: null,
+        roundOffsetMs: 0,
       };
 
     case 'answer_ack':
@@ -135,6 +142,50 @@ function reducer(s: ClientMatchState, a: Action): ClientMatchState {
       return ev.online
         ? { ...s, oppOnline: true, forfeitAt: null }
         : { ...s, phase: 'paused', round: null, oppOnline: false, forfeitAt: a.at + (ev.forfeitInMs ?? 0) };
+
+    case 'link':
+      return { ...s, linkDown: !ev.online };
+
+    case 'sync': {
+      const questions = { ...s.questions };
+      for (const it of ev.questions) questions[it.round] = it.question;
+      const reveal = ev.reveal
+        ? { winner: ev.reveal.winner === null ? null : mine(ev.reveal.winner), reason: ev.reveal.reason, correctIndex: ev.reveal.correctIndex }
+        : null;
+      const oppAbsent = ev.paused !== null && ev.paused.absentSide !== s.mySide;
+      const phase: Phase =
+        ev.phase === 'resuming' ? 'paused' : ev.phase === 'countdown' ? 'countdown' : ev.phase;
+      return {
+        ...s,
+        phase: ev.end ? 'ended' : phase,
+        me: ev.players[s.mySide],
+        opp: ev.players[s.mySide === 0 ? 1 : 0],
+        category: ev.category,
+        countdownEndsAt: ev.countdownMs !== null ? a.at + ev.countdownMs : s.countdownEndsAt,
+        questions,
+        round: ev.round,
+        questionNumber: ev.questionNumber,
+        suddenDeath: ev.suddenDeath,
+        myChoice: ev.mine?.choice ?? null,
+        myVerdict: ev.mine ? (ev.mine.correct ? 'correct' : 'wrong') : null,
+        oppAnswer: ev.oppAnswer,
+        reveal,
+        pos: myPos(ev.pos),
+        wins: myWins(ev.wins),
+        oppOnline: !oppAbsent,
+        forfeitAt: oppAbsent ? a.at + ev.paused!.forfeitInMs : null,
+        linkDown: false,
+        roundOffsetMs: ev.roundElapsedMs ?? 0,
+        end: ev.end
+          ? {
+              iWon: ev.end.finish.winner === s.mySide,
+              reason: ev.end.finish.reason,
+              history: ev.end.history,
+              durationMs: ev.end.durationMs,
+            }
+          : null,
+      };
+    }
 
     case 'match_end':
       return {
@@ -184,13 +235,15 @@ export function useMatch<T extends MatchTransport>(createTransport: () => T, myS
   useEffect(() => {
     if (!questionVisible || state.round === null) return;
     const round = state.round;
+    const offset = state.roundOffsetMs;
     const raf = requestAnimationFrame(() => {
-      const v = { round, at: performance.now() };
+      // On a rejoin mid-question, back-date the start so our clock matches the referee's.
+      const v = { round, at: performance.now() - offset };
       shownRef.current = v;
       setShown(v);
     });
     return () => cancelAnimationFrame(raf);
-  }, [questionVisible, state.round]);
+  }, [questionVisible, state.round, state.roundOffsetMs]);
 
   const shownAt = questionVisible && shown?.round === state.round ? shown.at : null;
 

@@ -1,0 +1,9 @@
+# Minimal Supabase CLI config for Tug of Wits.
+project_id = "tug-of-wits"
+
+[auth]
+# Players are anonymous users: no sign-up, but each device gets a stable id.
+enable_anonymous_sign_ins = true
+
+[functions.referee]
+verify_jwt = true

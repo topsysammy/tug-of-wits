@@ -45,13 +45,47 @@ export type ServerEvent =
     }
   /** A player dropped (online=false) or came back (online=true). */
   | { t: 'presence'; side: Side; online: boolean; forfeitInMs?: number }
-  | {
-      t: 'match_end';
-      finish: MatchFinish;
-      pos: number;
-      wins: [number, number];
-      history: RoundRecord[];
-      durationMs: number;
-    };
+  | MatchEndEvent
+  | SyncEvent
+  /** Client-local: this phone's own connection to the room dropped or came back. Never sent by the server. */
+  | { t: 'link'; online: boolean };
+
+export interface MatchEndEvent {
+  t: 'match_end';
+  finish: MatchFinish;
+  pos: number;
+  wins: [number, number];
+  history: RoundRecord[];
+  durationMs: number;
+}
+
+/**
+ * Full picture of the match for one side — sent when a phone opens the match screen or
+ * comes back after a drop, so it can render without having seen earlier events.
+ */
+export interface SyncEvent {
+  t: 'sync';
+  players: [PlayerInfo, PlayerInfo];
+  category: CategoryId;
+  difficulty: Difficulty;
+  phase: 'countdown' | 'question' | 'reveal' | 'paused' | 'resuming' | 'ended';
+  /** Countdown: ms until the first question. */
+  countdownMs: number | null;
+  round: number | null;
+  questionNumber: number;
+  suddenDeath: boolean;
+  /** The current round's question (if any) plus the preloaded ones. */
+  questions: { round: number; question: PublicQuestion }[];
+  /** How long the current question has been open, so a rejoining phone's clock lines up. */
+  roundElapsedMs: number | null;
+  /** This side's answer in the current round, if any. */
+  mine: { choice: number; correct: boolean } | null;
+  oppAnswer: 'correct' | 'wrong' | null;
+  reveal: { winner: Side | null; reason: RoundEndReason; correctIndex: number } | null;
+  pos: number;
+  wins: [number, number];
+  paused: { absentSide: Side; forfeitInMs: number } | null;
+  end: Omit<MatchEndEvent, 't'> | null;
+}
 
 export type ClientMessage = { t: 'answer'; round: number; choice: number; reportedMs: number };
